@@ -74,7 +74,7 @@ type CarouselEventHandler = (api: CarouselAPI, event: string) => void
 ### scrollTo()
 - **Signature**: `scrollTo(index: number, jump?: boolean): void`
 - **Description**: Scrolls to the snap at the given zero-based index.
-- **Valid when**: Carousel is not destroyed.
+- **Valid when**: Carousel is not destroyed. If destroyed, does nothing.
 - **Returns**: `void`
 - **Error contract**: Negative indices and indices beyond the last snap are no-ops.
   No throw.
@@ -129,8 +129,9 @@ type CarouselEventHandler = (api: CarouselAPI, event: string) => void
 
 ### scrollProgress()
 - **Signature**: `scrollProgress(): number`
-- **Description**: Returns the current scroll position as a value between 0 and 1,
-  where 0 is the start and 1 is the end. Useful for progress bar plugins.
+- **Description**: Returns the current scroll position as a live interpolated value
+  between 0 and 1, where 0 is the start and 1 is the end. Updates on every animation
+  frame during scrolling. Useful for progress bar plugins.
 - **Valid when**: Any state. Returns `0` after `destroy()`.
 - **Returns**: `number`
 - **Error contract**: No throw.
@@ -185,9 +186,9 @@ type CarouselEventHandler = (api: CarouselAPI, event: string) => void
 ### reInit()
 - **Signature**: `reInit(options?: Partial<Options>): void`
 - **Description**: Re-initializes the carousel. If `options` are provided, they are
-  merged into the current options (not replaced). The carousel re-reads the DOM,
-  re-applies layout, and fires the `reInit` event. Existing event listeners are
-  preserved.
+  shallow-merged into the current options (not replaced — omitted keys retain their
+  current values). The carousel re-reads the DOM, re-applies layout, and fires the
+  `reInit` event. Existing event listeners are preserved.
 - **Valid when**: Carousel is not destroyed.
 - **Returns**: `void`
 - **Error contract**: No throw. Calling on a destroyed carousel does nothing.
@@ -211,8 +212,9 @@ type CarouselEventHandler = (api: CarouselAPI, event: string) => void
 
 ### off()
 - **Signature**: `off(event: string, handler: CarouselEventHandler): CarouselAPI`
-- **Description**: Removes a previously registered handler. If the handler was not
-  registered, does nothing.
+- **Description**: Removes one registration of the given handler for the given event
+  name. If the same handler was registered multiple times via `on()`, each `off()` call
+  removes one registration. If the handler was not registered, does nothing.
 - **Valid when**: Any state.
 - **Returns**: `CarouselAPI` (for method chaining)
 - **Error contract**: No throw.
