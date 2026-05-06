@@ -1,6 +1,6 @@
 # carouselWords Specification
 
-**Version:** 1.0.0
+**Version:** v1.0.0
 
 `carouselWords` is a ghost library. This file, together with OPTIONS.md, METHODS.md,
 EVENTS.md, PLUGINS.md, and tests.yaml, is everything an AI agent needs to implement a
@@ -11,7 +11,7 @@ The spec is the single source of truth.
 
 ## 1. HTML Contract
 
-A carousel requires three nested DOM elements. The agent must produce and manage
+A carousel requires four nested DOM elements. The agent must produce and manage
 this structure. No CSS framework is assumed.
 
 ```html
