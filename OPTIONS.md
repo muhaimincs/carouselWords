@@ -78,7 +78,7 @@ type Options = {
 - **Description**: Controls whether the carousel constrains scrolling to avoid
   whitespace at the edges. `'trimSnaps'` removes snap points that would cause empty
   space. `'keepSnaps'` retains all snap points. `false` disables containment.
-- **Constraints**: None.
+- **Constraints**: When `loop: true`, containment is overridden to `false` at runtime regardless of this option's value.
 - **Interacts with**: `loop` — containment is automatically disabled when `loop: true`.
 
 ### slidesToScroll
@@ -99,7 +99,7 @@ type Options = {
 - **Description**: When `true`, the carousel continues scrolling with momentum after
   a drag ends — no snapping. When `false`, it snaps to the nearest slide after release.
 - **Constraints**: None.
-- **Interacts with**: `skipSnaps`, `duration`
+- **Interacts with**: `skipSnaps`, `duration`, `draggable` — has no effect when `draggable: false`
 
 ### dragThreshold
 - **Type**: `number`
@@ -153,7 +153,7 @@ type Options = {
 - **Description**: Zero-based index of the slide the carousel starts on.
 - **Constraints**: Values below 0 are clamped to 0. Values above the last valid
   index are clamped to the last valid index.
-- **Interacts with**: None.
+- **Interacts with**: `loop` (affects whether index wraps), `slidesToScroll` (affects valid snap indices), `breakpoints` (a breakpoint may change the slide count, re-triggering clamping)
 
 ---
 
@@ -185,7 +185,7 @@ type Options = {
   `0` means any pixel is visible; `1` means the entire slide must be visible.
   An array provides per-slide thresholds.
 - **Constraints**: Values must be between 0 and 1 inclusive.
-- **Interacts with**: `inViewMargin`, `slidesInView` event
+- **Interacts with**: `inViewMargin`, `slidesInView` event (see EVENTS.md)
 
 ### inViewMargin
 - **Type**: `string`
@@ -210,7 +210,7 @@ type Options = {
 - **Type**: `boolean`
 - **Default**: `true`
 - **Description**: When `false`, the carousel initializes but does not attach any
-  event listeners or apply any interactive behavior. The DOM is not modified.
+  event listeners or apply any interactive behavior. Interactive behavior is suspended.
   All API methods are no-ops.
 - **Constraints**: None.
 - **Interacts with**: All behavior options — all are disabled when `active: false`.
@@ -222,7 +222,7 @@ type Options = {
   the root element is resized (via ResizeObserver). When `false`, layout changes
   from resizing are ignored.
 - **Constraints**: None.
-- **Interacts with**: `breakpoints`
+- **Interacts with**: `breakpoints`, `active` — ResizeObserver is not attached when `active: false`
 
 ### focus
 - **Type**: `boolean`
@@ -230,7 +230,7 @@ type Options = {
 - **Description**: When `true`, the carousel listens for focus events on slides and
   fires the `slideFocus` event. When `false`, focus events are not tracked.
 - **Constraints**: None.
-- **Interacts with**: `slideFocus` event
+- **Interacts with**: `slideFocus` event (see EVENTS.md)
 
 ### slideChanges
 - **Type**: `boolean`
@@ -239,4 +239,4 @@ type Options = {
   and calls `reInit()` automatically when slides are added or removed. When `false`,
   DOM mutations in the container are ignored.
 - **Constraints**: None.
-- **Interacts with**: `reInit` event
+- **Interacts with**: `reInit` event (see EVENTS.md)
