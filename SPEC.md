@@ -34,7 +34,7 @@ this structure. No CSS framework is assumed.
 
 **Layout rules:**
 - The viewport must have `overflow: hidden`.
-- The container lays out slides in a single row (or column when `axis: 'y'`).
+- The container lays out slides in a single row (or column when `axis: 'y'`; see OPTIONS.md).
 - Slides must not wrap to a second row or column.
 
 ---
@@ -50,10 +50,10 @@ function createCarousel(
 ```
 
 - `root` — the `.carousel` element. Required. Throws `TypeError` if null or not an HTMLElement.
-- `options` — configuration object. All keys are optional. Unrecognized keys are silently ignored.
-- `plugins` — array of plugin factories. Optional, defaults to `[]`.
+- `options` — configuration object. All keys are optional. Unrecognized keys are silently ignored. `Options` is defined in OPTIONS.md.
+- `plugins` — array of plugin factories. Optional, defaults to `[]`. `CarouselPlugin` is defined in PLUGINS.md.
 
-Returns a `CarouselAPI` object. See METHODS.md for the full shape of `CarouselAPI`.
+Returns a `CarouselAPI` object. `CarouselAPI` is defined in METHODS.md.
 
 **Invariants:**
 - No `new` keyword. `createCarousel` is a plain factory function.
@@ -66,15 +66,15 @@ Returns a `CarouselAPI` object. See METHODS.md for the full shape of `CarouselAP
 ## 3. Design Principles
 
 - **No global state** — two carousels on the same page must not share any state.
-- **Lazy DOM reads** — measure the DOM at `init` time. Do not poll continuously.
-  Exception: `resize: true` uses a ResizeObserver.
+- **Lazy DOM reads** — measure the DOM at initialization time. Do not poll continuously.
+  Exception: when the `resize` option is `true` (see OPTIONS.md), a ResizeObserver watches the root element and calls `reInit()` on resize.
 - **Deterministic behavior** — identical options plus identical DOM always produces
   identical initial state.
 - **Graceful no-op** — any `CarouselAPI` method called after `destroy()` does nothing
   and returns `undefined`. No exceptions are thrown.
-- **TypeScript types required** — all public surfaces (Options, CarouselAPI,
-  CarouselPlugin, event handlers) must have explicit TypeScript type definitions
-  exported from the library entry point.
+- **TypeScript types required** — all public surfaces (`Options`, `CarouselAPI`,
+  `CarouselPlugin`, `CarouselEventHandler`) must have explicit TypeScript type definitions
+  exported from the library entry point. Each type is defined in its corresponding spec file.
 
 ---
 
