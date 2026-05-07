@@ -1,0 +1,403 @@
+version: 1.0.0
+
+# Scenario format:
+# name: unique readable description
+# setup: initial state (slides count, options, start position)
+# action: what to do (method call, event trigger)
+# expect: state after action and/or event fired
+
+scenarios:
+
+  # --- Initialization ---
+
+  - name: "Initializes with minimum required markup"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root)"
+    expect:
+      no_error: true
+      selectedScrollSnap: 0
+
+  - name: "All options are optional — no options argument"
+    setup:
+      slides: 3
+    action: "call createCarousel(root) with no options argument"
+    expect:
+      no_error: true
+      selectedScrollSnap: 0
+
+  - name: "Unknown option is silently ignored"
+    setup:
+      slides: 3
+      options: { unknownOption: true }
+    action: "call createCarousel(root, { unknownOption: true })"
+    expect:
+      no_error: true
+
+  - name: "Null root throws TypeError"
+    setup:
+      slides: 3
+    action: "call createCarousel(null)"
+    expect:
+      throws: TypeError
+
+  - name: "Two carousels on same page are isolated"
+    setup:
+      carousels: 2
+      slides_each: 3
+      options_each: { startSnap: 0 }
+    action: "call scrollNext() on carousel 1"
+    expect:
+      carousel_1_selectedScrollSnap: 1
+      carousel_2_selectedScrollSnap: 0
+
+  # --- scrollNext ---
+
+  - name: "scrollNext advances from first slide"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 1
+      event_fired: select
+
+  - name: "scrollNext at last slide with loop:false is no-op"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 4
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 4
+      event_fired: null
+
+  - name: "scrollNext at last slide with loop:true wraps to first"
+    setup:
+      slides: 5
+      options: { loop: true }
+      startSnap: 4
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 0
+      event_fired: select
+
+  - name: "scrollNext with jump:true changes snap without animation"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "call scrollNext(true)"
+    expect:
+      selectedScrollSnap: 1
+      settle_fired: false
+
+  # --- scrollPrev ---
+
+  - name: "scrollPrev retreats from last slide"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 4
+    action: "call scrollPrev()"
+    expect:
+      selectedScrollSnap: 3
+      event_fired: select
+
+  - name: "scrollPrev at first slide with loop:false is no-op"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "call scrollPrev()"
+    expect:
+      selectedScrollSnap: 0
+      event_fired: null
+
+  - name: "scrollPrev at first slide with loop:true wraps to last"
+    setup:
+      slides: 5
+      options: { loop: true }
+      startSnap: 0
+    action: "call scrollPrev()"
+    expect:
+      selectedScrollSnap: 4
+      event_fired: select
+
+  - name: "scrollPrev with jump:true changes snap without animation"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 4
+    action: "call scrollPrev(true)"
+    expect:
+      selectedScrollSnap: 3
+      settle_fired: false
+
+  # --- scrollTo ---
+
+  - name: "scrollTo(2) navigates directly to slide 2"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "call scrollTo(2)"
+    expect:
+      selectedScrollSnap: 2
+      event_fired: select
+
+  - name: "scrollTo(0) from middle returns to first"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 3
+    action: "call scrollTo(0)"
+    expect:
+      selectedScrollSnap: 0
+      event_fired: select
+
+  - name: "scrollTo with negative index is no-op"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 2
+    action: "call scrollTo(-1)"
+    expect:
+      selectedScrollSnap: 2
+      event_fired: null
+
+  - name: "scrollTo with out-of-range index is no-op"
+    setup:
+      slides: 3
+      options: {}
+      startSnap: 1
+    action: "call scrollTo(10)"
+    expect:
+      selectedScrollSnap: 1
+      event_fired: null
+
+  - name: "scrollTo with jump:true skips animation"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "call scrollTo(3, true)"
+    expect:
+      selectedScrollSnap: 3
+      settle_fired: false
+
+  # --- canScrollNext / canScrollPrev ---
+
+  - name: "canScrollNext returns true when not at last slide"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "call canScrollNext()"
+    expect:
+      result: true
+
+  - name: "canScrollNext returns false at last slide with loop:false"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 4
+    action: "call canScrollNext()"
+    expect:
+      result: false
+
+  - name: "canScrollNext returns true at last slide with loop:true"
+    setup:
+      slides: 5
+      options: { loop: true }
+      startSnap: 4
+    action: "call canScrollNext()"
+    expect:
+      result: true
+
+  - name: "canScrollNext returns false with one slide and loop:false"
+    setup:
+      slides: 1
+      options: { loop: false }
+    action: "call canScrollNext()"
+    expect:
+      result: false
+
+  - name: "canScrollPrev returns false at first slide with loop:false"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "call canScrollPrev()"
+    expect:
+      result: false
+
+  - name: "canScrollPrev returns true at first slide with loop:true"
+    setup:
+      slides: 5
+      options: { loop: true }
+      startSnap: 0
+    action: "call canScrollPrev()"
+    expect:
+      result: true
+
+  - name: "canScrollPrev returns true when not at first slide"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 2
+    action: "call canScrollPrev()"
+    expect:
+      result: true
+
+  - name: "canScrollPrev returns false with one slide and loop:false"
+    setup:
+      slides: 1
+      options: { loop: false }
+    action: "call canScrollPrev()"
+    expect:
+      result: false
+
+  # --- selectedScrollSnap / previousScrollSnap / scrollSnapList ---
+
+  - name: "selectedScrollSnap returns startSnap on init"
+    setup:
+      slides: 5
+      options: { startSnap: 2 }
+    action: "call selectedScrollSnap() immediately after init"
+    expect:
+      result: 2
+
+  - name: "selectedScrollSnap returns new snap after scrollNext"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "call scrollNext(), then call selectedScrollSnap()"
+    expect:
+      result: 1
+
+  - name: "previousScrollSnap returns 0 before any navigation"
+    setup:
+      slides: 5
+      options: {}
+    action: "call previousScrollSnap() immediately after init"
+    expect:
+      result: 0
+
+  - name: "previousScrollSnap returns prior snap after scrollNext"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "call scrollNext(), then call previousScrollSnap()"
+    expect:
+      result: 0
+
+  - name: "scrollSnapList length equals slide count with default options"
+    setup:
+      slides: 4
+      options: {}
+    action: "call scrollSnapList()"
+    expect:
+      result_length: 4
+
+  # --- DOM access ---
+
+  - name: "rootNode returns the element passed to createCarousel"
+    setup:
+      slides: 3
+    action: "call rootNode()"
+    expect:
+      result: "the root HTMLElement passed to createCarousel"
+
+  - name: "containerNode returns the .carousel__container element"
+    setup:
+      slides: 3
+    action: "call containerNode()"
+    expect:
+      result: "the .carousel__container HTMLElement"
+
+  - name: "slideNodes returns all .carousel__slide elements"
+    setup:
+      slides: 3
+    action: "call slideNodes()"
+    expect:
+      result_length: 3
+      result_type: "array of HTMLElement"
+
+  # --- reInit ---
+
+  - name: "reInit re-reads DOM and reapplies layout"
+    setup:
+      slides: 3
+      options: { loop: false }
+      startSnap: 0
+    action: "call reInit()"
+    expect:
+      no_error: true
+      selectedScrollSnap: 0
+
+  - name: "reInit with new options merges options"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 4
+    action: "call reInit({ loop: true }), then call canScrollNext()"
+    expect:
+      result: true
+
+  - name: "reInit preserves existing event listeners"
+    setup:
+      slides: 3
+      options: {}
+    action: "register a 'select' handler, call reInit(), then call scrollNext()"
+    expect:
+      handler_called: true
+
+  - name: "reInit fires the reInit event"
+    setup:
+      slides: 3
+      options: {}
+    action: "register a 'reInit' handler, call reInit()"
+    expect:
+      handler_called: true
+
+  # --- destroy ---
+
+  - name: "After destroy, scrollNext is a no-op"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "call destroy(), then call scrollNext()"
+    expect:
+      no_error: true
+      selectedScrollSnap: 0
+
+  - name: "destroy is idempotent — calling twice does not throw"
+    setup:
+      slides: 3
+      options: {}
+    action: "call destroy() twice"
+    expect:
+      no_error: true
+
+  - name: "After destroy, canScrollNext returns false"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "call destroy(), then call canScrollNext()"
+    expect:
+      result: false
+
+  - name: "destroy fires the destroy event"
+    setup:
+      slides: 3
+      options: {}
+    action: "register a 'destroy' handler, call destroy()"
+    expect:
+      handler_called: true
