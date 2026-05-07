@@ -401,3 +401,385 @@ scenarios:
     action: "register a 'destroy' handler, call destroy()"
     expect:
       handler_called: true
+
+  # --- Options: startSnap ---
+
+  - name: "startSnap:2 initializes at slide 2"
+    setup:
+      slides: 5
+      options: { startSnap: 2 }
+    action: "call selectedScrollSnap() after init"
+    expect:
+      result: 2
+
+  - name: "startSnap out of range is clamped to last valid index"
+    setup:
+      slides: 3
+      options: { startSnap: 10 }
+    action: "call selectedScrollSnap() after init"
+    expect:
+      result: 2
+
+  - name: "startSnap negative is clamped to 0"
+    setup:
+      slides: 3
+      options: { startSnap: -1 }
+    action: "call selectedScrollSnap() after init"
+    expect:
+      result: 0
+
+  # --- Options: loop ---
+
+  - name: "loop:true — scrollNext wraps last to first"
+    setup:
+      slides: 3
+      options: { loop: true }
+      startSnap: 2
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 0
+
+  - name: "loop:false — scrollNext stops at last"
+    setup:
+      slides: 3
+      options: { loop: false }
+      startSnap: 2
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 2
+
+  # --- Options: slidesToScroll ---
+
+  - name: "slidesToScroll:2 advances two slides per scrollNext"
+    setup:
+      slides: 6
+      options: { slidesToScroll: 2 }
+      startSnap: 0
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 2
+
+  - name: "slidesToScroll:2 near end does not overshoot"
+    setup:
+      slides: 5
+      options: { slidesToScroll: 2, loop: false }
+      startSnap: 3
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 4
+
+  # --- Options: active ---
+
+  - name: "active:false — scrollNext does nothing"
+    setup:
+      slides: 5
+      options: { active: false }
+      startSnap: 0
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 0
+      event_fired: null
+
+  - name: "active:false — carousel does not fire init event"
+    setup:
+      slides: 3
+      options: { active: false }
+    action: "register 'init' handler, call createCarousel()"
+    expect:
+      handler_called: false
+
+  # --- Options: dragFree ---
+
+  - name: "dragFree:false — carousel snaps to nearest slide after drag"
+    setup:
+      slides: 5
+      options: { dragFree: false }
+    action: "simulate drag gesture that ends between slides"
+    expect:
+      carousel_is_on_a_snap_point: true
+
+  - name: "dragFree:true — carousel does not snap after drag"
+    setup:
+      slides: 5
+      options: { dragFree: true }
+    action: "simulate drag gesture that ends between slides"
+    expect:
+      carousel_is_on_a_snap_point: false
+
+  # --- Options: breakpoints ---
+
+  - name: "breakpoints: matching query overrides root option"
+    setup:
+      slides: 5
+      options:
+        slidesToScroll: 1
+        breakpoints:
+          "(min-width: 0px)": { slidesToScroll: 2 }
+    action: "call scrollNext() (breakpoint matches at any viewport width)"
+    expect:
+      selectedScrollSnap: 2
+
+  - name: "breakpoints: non-matching query leaves root option unchanged"
+    setup:
+      slides: 5
+      options:
+        slidesToScroll: 1
+        breakpoints:
+          "(min-width: 99999px)": { slidesToScroll: 3 }
+    action: "call scrollNext()"
+    expect:
+      selectedScrollSnap: 1
+
+  # --- Events: init ---
+
+  - name: "init event fires once after createCarousel"
+    setup:
+      slides: 3
+      options: {}
+    action: "register 'init' handler, call createCarousel()"
+    expect:
+      handler_call_count: 1
+
+  - name: "init event does not fire on reInit"
+    setup:
+      slides: 3
+      options: {}
+    action: "register 'init' handler, call createCarousel(), then call reInit()"
+    expect:
+      handler_call_count: 1
+
+  - name: "init event fires before any select event"
+    setup:
+      slides: 5
+      options: { startSnap: 0 }
+    action: "register handlers for both 'init' and 'select', call createCarousel()"
+    expect:
+      first_event_fired: init
+
+  # --- Events: select and settle ---
+
+  - name: "select event fires when scrollNext changes slide"
+    setup:
+      slides: 5
+      options: { loop: false }
+      startSnap: 0
+    action: "register 'select' handler, call scrollNext()"
+    expect:
+      handler_called: true
+
+  - name: "select fires before settle"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "register handlers for both 'select' and 'settle', call scrollNext()"
+    expect:
+      event_order: [select, settle]
+
+  - name: "select does not fire for no-op scrollNext"
+    setup:
+      slides: 3
+      options: { loop: false }
+      startSnap: 2
+    action: "register 'select' handler, call scrollNext()"
+    expect:
+      handler_called: false
+
+  - name: "selectedScrollSnap inside select handler returns new snap"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "in 'select' handler, read api.selectedScrollSnap(); call scrollNext()"
+    expect:
+      handler_result: 1
+
+  - name: "settle does not fire when jump:true"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "register 'settle' handler, call scrollNext(true)"
+    expect:
+      handler_called: false
+
+  # --- Events: scroll ---
+
+  - name: "scroll event fires during programmatic animation"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "register 'scroll' handler, call scrollTo(4)"
+    expect:
+      handler_call_count: ">1"
+
+  - name: "scroll does not fire after carousel settles"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: >
+      register 'scroll' handler, call scrollNext(), wait for settle,
+      then call scrollProgress() — scroll count should stop increasing
+    expect:
+      scroll_fires_after_settle: false
+
+  # --- Events: reInit and destroy ---
+
+  - name: "reInit event fires after reInit() is called"
+    setup:
+      slides: 3
+      options: {}
+    action: "register 'reInit' handler, call reInit()"
+    expect:
+      handler_called: true
+
+  - name: "reInit event: state queries inside handler return post-reinit values"
+    setup:
+      slides: 5
+      options: { startSnap: 0 }
+    action: >
+      register 'reInit' handler that reads selectedScrollSnap(),
+      call reInit({ startSnap: 3 })
+    expect:
+      handler_result: 3
+
+  - name: "destroy event fires when destroy() is called"
+    setup:
+      slides: 3
+      options: {}
+    action: "register 'destroy' handler, call destroy()"
+    expect:
+      handler_called: true
+
+  # --- Events: slidesInView / slidesNotInView ---
+
+  - name: "slidesInView event fires on init"
+    setup:
+      slides: 5
+      options: {}
+    action: "register 'slidesInView' handler, call createCarousel()"
+    expect:
+      handler_called: true
+
+  - name: "slidesInView — api.slidesInView() inside handler returns visible indices"
+    setup:
+      slides: 5
+      options: {}
+    action: "in 'slidesInView' handler, call api.slidesInView()"
+    expect:
+      result_type: "non-empty array of numbers"
+
+  - name: "slidesNotInView — api.slidesNotInView() is complement of slidesInView"
+    setup:
+      slides: 5
+      options: {}
+    action: "after init, compare api.slidesInView() and api.slidesNotInView()"
+    expect:
+      combined_length: 5
+      no_overlap: true
+
+  # --- Events: slideFocus ---
+
+  - name: "slideFocus event fires when a slide receives focus and focus:true"
+    setup:
+      slides: 3
+      options: { focus: true }
+    action: "register 'slideFocus' handler, trigger focus on second slide element"
+    expect:
+      handler_called: true
+
+  - name: "slideFocus event does not fire when focus:false"
+    setup:
+      slides: 3
+      options: { focus: false }
+    action: "register 'slideFocus' handler, trigger focus on second slide element"
+    expect:
+      handler_called: false
+
+  # --- Plugin lifecycle ---
+
+  - name: "Plugin init() is called after createCarousel"
+    setup:
+      slides: 3
+      options: {}
+      plugins: [pluginA]
+    action: "call createCarousel() with pluginA"
+    expect:
+      pluginA_init_called: true
+
+  - name: "Plugin destroy() is called when carousel is destroyed"
+    setup:
+      slides: 3
+      options: {}
+      plugins: [pluginA]
+    action: "call createCarousel(), then call destroy()"
+    expect:
+      pluginA_destroy_called: true
+
+  - name: "Two plugins — init called in registration order"
+    setup:
+      slides: 3
+      options: {}
+      plugins: [pluginA, pluginB]
+    action: "call createCarousel()"
+    expect:
+      init_order: [pluginA, pluginB]
+
+  - name: "Two plugins — destroy called in reverse registration order"
+    setup:
+      slides: 3
+      options: {}
+      plugins: [pluginA, pluginB]
+    action: "call createCarousel(), then call destroy()"
+    expect:
+      destroy_order: [pluginB, pluginA]
+
+  - name: "Plugin receives full CarouselAPI in factory"
+    setup:
+      slides: 3
+      options: {}
+    action: "create plugin that reads api.selectedScrollSnap() in factory, register it"
+    expect:
+      no_error: true
+      factory_receives_carousel_api: true
+
+  - name: "Plugin with duplicate name — second init() is called"
+    setup:
+      slides: 3
+      options: {}
+      plugins: [pluginA_v1, pluginA_v2]
+    action: "register two plugins with name 'pluginA', call createCarousel()"
+    expect:
+      pluginA_v1_init_called: false
+      pluginA_v2_init_called: true
+
+  - name: "Plugin can register event listeners in init() and receive them"
+    setup:
+      slides: 5
+      options: {}
+      plugins: [listenerPlugin]
+    action: "call createCarousel(), then call scrollNext()"
+    expect:
+      plugin_select_handler_called: true
+
+  - name: "Plugin removes its listeners in destroy()"
+    setup:
+      slides: 5
+      options: {}
+      plugins: [listenerPlugin]
+    action: "call createCarousel(), call destroy(), then verify no stale listeners remain"
+    expect:
+      no_error: true
+      listeners_removed: true
+
+  - name: "Plugin can call api.scrollNext() inside init()"
+    setup:
+      slides: 5
+      options: {}
+      startSnap: 0
+    action: "create plugin whose init() calls api.scrollNext(), register it"
+    expect:
+      no_error: true
+      selectedScrollSnap: 1
