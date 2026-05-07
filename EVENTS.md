@@ -36,6 +36,13 @@ These are the rules agents most commonly get wrong. Implement these exactly.
 4. **`reInit` fires after new state is applied** — any state query called inside
    a `reInit` handler returns post-reinit values, not pre-reinit values.
 
+5. **`select` does not fire on `reInit()`** — re-initializing the carousel does not
+   trigger a `select` event, even if the selected snap index changes as a result.
+
+6. **`destroy` is synchronous and final** — `destroy()` fires before any pending
+   animation frames can execute. It is not possible for a `scroll` event to fire
+   after `destroy()` is called. No event fires after `destroy`.
+
 ---
 
 ## Lifecycle Events
