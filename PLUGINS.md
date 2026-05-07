@@ -71,11 +71,16 @@ createCarousel(root, options, [pluginA, pluginB])
 ## Plugin Rules
 
 1. **Must not mutate options** — a plugin must not modify the `options` object
-   passed to `createCarousel()`. Options are read-only from the plugin's perspective.
+   passed to `createCarousel()`. The options object is passed by reference and is
+   not frozen — it is the plugin's responsibility to treat it as read-only.
 
 2. **Must clean up in `destroy()`** — every event listener registered via
    `api.on()` inside `init()` must be removed via `api.off()` inside `destroy()`.
-   Failing to clean up will cause memory leaks and stale handler calls.
+   Failing to clean up will cause memory leaks and stale handler calls. Note: the
+   carousel fires the `destroy` event before calling plugin `destroy()` functions,
+   so a plugin handler listening to `destroy` will fire while the plugin is still
+   active — this is intentional and allows plugins to react to teardown before
+   cleaning up.
 
 3. **Duplicate `name` — last wins** — if two plugins share the same `name`, the
    second plugin replaces the first. Only the second plugin's `init()` is called.
