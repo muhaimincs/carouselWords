@@ -44,7 +44,7 @@ Implement a carousel library in [LANGUAGE] that:
 - Satisfies every contract described in the spec files
 - Passes every scenario in tests.yaml
 - Exports createCarousel() as the sole public entry point
-- Exports TypeScript types for Options, CarouselAPI, CarouselPlugin, and CarouselEventHandler
+- If using TypeScript: also export types for Options, CarouselAPI, CarouselPlugin, and CarouselEventHandler
 
 Output exactly two files:
 1. carousel.[ext] — the full library implementation
