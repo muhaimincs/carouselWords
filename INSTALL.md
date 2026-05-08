@@ -14,7 +14,7 @@ dependencies. The spec is the single source of truth.
    target language (e.g. `TypeScript`, `JavaScript`).
 3. The agent implements the carousel library and a test file.
 4. Run the tests. If any scenarios fail, paste the failures back and tell the agent
-   to iterate until all 82 scenarios pass.
+   to iterate until all 93 scenarios pass.
 
 ---
 
@@ -28,7 +28,7 @@ Give your agent the files in this order:
 4. `EVENTS.md` — all 9 events with trigger conditions and ordering guarantees
 5. `PLUGINS.md` — plugin interface contract and registration rules
 6. `ACCESSIBILITY.md` — WCAG 2.2 Level AA contract: injected ARIA attributes, keyboard bindings, consumer responsibilities
-7. `tests.yaml` — 92 scenario-based test cases
+7. `tests.yaml` — 93 scenario-based test cases
 
 ---
 
@@ -72,4 +72,4 @@ The following scenarios failed:
 Fix the implementation to make them pass. Do not change the test file.
 ```
 
-Repeat until all 82 scenarios pass.
+Repeat until all 93 scenarios pass.
