@@ -120,4 +120,3 @@ versions are not used for spec changes.
 ## License
 
 MIT
-# carouselWords
