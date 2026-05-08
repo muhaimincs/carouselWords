@@ -28,6 +28,7 @@ type Options = {
   resize: boolean
   focus: boolean
   slideChanges: boolean
+  ariaLabel: string
 }
 ```
 
@@ -240,3 +241,16 @@ type Options = {
   DOM mutations in the container are ignored.
 - **Constraints**: None.
 - **Interacts with**: `reInit` event (see EVENTS.md)
+
+---
+
+## Accessibility
+
+### ariaLabel
+- **Type**: `string`
+- **Default**: `'Carousel'`
+- **Description**: The accessible name for the carousel region. Applied as `aria-label`
+  on the root element. Used by screen readers to identify the carousel landmark.
+  See `ACCESSIBILITY.md` for the full list of ARIA attributes the library injects.
+- **Constraints**: Empty string is treated as `'Carousel'` (falls back to default).
+- **Interacts with**: WCAG 2.2 accessibility contract (see ACCESSIBILITY.md)

@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 1.1.0
 
 # Scenario format:
 # name: unique readable description
@@ -783,3 +783,127 @@ scenarios:
     expect:
       no_error: true
       selectedScrollSnap: 1
+
+  # --- Accessibility (WCAG 2.2) ---
+
+  - name: "Root element has role=region after init"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root)"
+    expect:
+      attribute:
+        element: root
+        name: role
+        value: region
+
+  - name: "Root element has aria-roledescription=carousel after init"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root)"
+    expect:
+      attribute:
+        element: root
+        name: aria-roledescription
+        value: carousel
+
+  - name: "Root element has default aria-label=Carousel when ariaLabel not set"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root)"
+    expect:
+      attribute:
+        element: root
+        name: aria-label
+        value: Carousel
+
+  - name: "Root element uses custom ariaLabel option value"
+    setup:
+      slides: 3
+      options:
+        ariaLabel: "Product gallery"
+    action: "call createCarousel(root)"
+    expect:
+      attribute:
+        element: root
+        name: aria-label
+        value: "Product gallery"
+
+  - name: "Empty ariaLabel falls back to default Carousel"
+    setup:
+      slides: 3
+      options:
+        ariaLabel: ""
+    action: "call createCarousel(root)"
+    expect:
+      attribute:
+        element: root
+        name: aria-label
+        value: Carousel
+
+  - name: "Each slide has role=group and aria-roledescription=slide"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root)"
+    expect:
+      all_slides:
+        attribute_role: group
+        attribute_aria-roledescription: slide
+
+  - name: "Slides have aria-label in N of M format"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root)"
+    expect:
+      slide_labels:
+        - "1 of 3"
+        - "2 of 3"
+        - "3 of 3"
+
+  - name: "Selected slide has aria-current=true, others do not"
+    setup:
+      slides: 3
+      options:
+        startSnap: 1
+    action: "call createCarousel(root)"
+    expect:
+      slide_aria_current:
+        index: 1
+        value: "true"
+      other_slides_no_aria_current: true
+
+  - name: "ArrowRight triggers scrollNext on axis x"
+    setup:
+      slides: 3
+      options:
+        axis: x
+        startSnap: 0
+    action: "focus root element, dispatch ArrowRight keydown"
+    expect:
+      selectedScrollSnap: 1
+
+  - name: "ArrowLeft triggers scrollPrev on axis x"
+    setup:
+      slides: 3
+      options:
+        axis: x
+        loop: true
+        startSnap: 1
+    action: "focus root element, dispatch ArrowLeft keydown"
+    expect:
+      selectedScrollSnap: 0
+
+  - name: "All injected ARIA attributes removed after destroy()"
+    setup:
+      slides: 3
+      options: {}
+    action: "call createCarousel(root), then call destroy()"
+    expect:
+      attributes_absent:
+        root: [role, aria-roledescription, aria-label]
+        viewport: [aria-live]
+        slides: [role, aria-roledescription, aria-label, aria-current]

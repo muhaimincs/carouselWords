@@ -78,6 +78,18 @@ Returns a `CarouselAPI` object. `CarouselAPI` is defined in METHODS.md.
 
 ---
 
+## 5. Accessibility Contract
+
+WCAG 2.2 Level AA compliance for library-owned surfaces is a versioned contract.
+Breaking it (removing an ARIA injection, changing a keyboard binding) is a **major
+version** bump.
+
+The full accessibility specification — injected attributes, keyboard bindings,
+cleanup rules, and consumer responsibilities — is defined in `ACCESSIBILITY.md`.
+Agents must read `ACCESSIBILITY.md` as part of the spec suite.
+
+---
+
 ## 4. Versioning Contract
 
 This spec is at `v1.0.0`. Each spec file carries this version in its header.

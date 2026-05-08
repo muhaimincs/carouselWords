@@ -23,11 +23,12 @@ dependencies. The spec is the single source of truth.
 Give your agent the files in this order:
 
 1. `SPEC.md` — core concepts, HTML contract, `createCarousel()` factory API, design principles
-2. `OPTIONS.md` — all 21 configuration options with types, defaults, and constraints
+2. `OPTIONS.md` — all 22 configuration options with types, defaults, and constraints
 3. `METHODS.md` — all 19 public methods with signatures, behavior, and error contracts
 4. `EVENTS.md` — all 9 events with trigger conditions and ordering guarantees
 5. `PLUGINS.md` — plugin interface contract and registration rules
-6. `tests.yaml` — 82 scenario-based test cases
+6. `ACCESSIBILITY.md` — WCAG 2.2 Level AA contract: injected ARIA attributes, keyboard bindings, consumer responsibilities
+7. `tests.yaml` — 92 scenario-based test cases
 
 ---
 
@@ -38,10 +39,14 @@ target (e.g. `TypeScript`, `JavaScript`):
 
 ```
 Read the following files in order: SPEC.md, OPTIONS.md, METHODS.md, EVENTS.md,
-PLUGINS.md. Then read tests.yaml.
+PLUGINS.md, ACCESSIBILITY.md. Then read tests.yaml.
+
+Before implementing, ask: should structural styles (overflow: hidden, flex layout)
+be applied as inline styles or via a companion stylesheet the consumer imports?
 
 Implement a carousel library in [LANGUAGE] that:
 - Satisfies every contract described in the spec files
+- Satisfies the WCAG 2.2 Level AA accessibility contract in ACCESSIBILITY.md
 - Passes every scenario in tests.yaml
 - Exports createCarousel() as the sole public entry point
 - If using TypeScript: also export types for Options, CarouselAPI, CarouselPlugin, and CarouselEventHandler
